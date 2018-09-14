@@ -1,42 +1,51 @@
 import fileinput
 import ast
 import re
-# example input
-'''
-2
-(A); (B); (C)
-(A, C); X; X
-'''
-#input = fileinput.input()
-#in_line_1 = input[0]
-#in_line_2 = input[1]
-#in_line_3 = input[2]
 
-in_line_2 = '(B, A); ("C", "D", "E"); ()'
+def format(line):
 
-# replace parenthesis for brackets
-in_line_2 = in_line_2.replace("(", "[")
-in_line_2 = in_line_2.replace(")", "]")
+    # split string on semicolon, create list
+    list_strings_in_2 = line.split(";")
+    print(list_strings_in_2)
 
-# remove white spaces
-in_line_2 = in_line_2.replace(" ", "")
+    lists = []
+    for x in list_strings_in_2:
+        # for each element on the list, delete parenthesis, whitespaces and commas
 
-# split string on semicolon, create list
-list_strings_in_2 = in_line_2.split(";")
-print(list_strings_in_2)
+        # replace parenthesis for brackets
+        x = x.replace("(", "")
+        x = x.replace(")", "")
 
-lists = []
-for x in list_strings_in_2:
-    # for each element on the list, evaluate string value into list of strings
-    # ast input expected format:
-    # ast.literal_eval('["A","B" ,"C" ," D"]')
+        # remove white spaces
+        x = x.replace(" ", "")
 
-    # change format of states from A to "A" with regex
-    x = re.sub(r'', r'', x)
+        # remove commas
+        x = x.replace(",", "")
 
-    # apend list to list
-    lists.append(ast.literal_eval(x))
+        # remove \n
+        x = x.replace("\n", "")
+
+        # apend list to list
+        lists.append(list(x))
+
     print(lists)
+    return lists
 
-print(lists)
+def main():
+    # example input
+    '''
+    2
+    (A); (B); (C)
+    (A, C); X; X
+    '''
+    input = fileinput.input()
+    in_line_1 = int(input[0])
+    in_line_2 = format(input[1])
+    in_line_3 = format(input[2])
 
+    #in_line_2 = '(B, A); (C, D, E); ()'
+
+    print("Line 1: %d\nLine 2: %s\nLine 3: %s" % (in_line_1, in_line_2, in_line_3))
+
+if __name__ == "__main__":
+    main()
