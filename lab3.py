@@ -58,6 +58,7 @@ def uniform_cost_search(max_h, goal, initial_state):
     while True:
         if len(frontier) == 0:
             return False
+        frontier = sorted(frontier, key=lambda n: n['cost'])
         node = frontier.pop()
         if test_goal(node, goal):
             display_goal(node, visited)
