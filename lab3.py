@@ -33,9 +33,40 @@ def format_input(line):
     # print(lists)
     return lists
 
-#def heuristic(state, goal):
-#    for i,stack in enumerate(state):
+def heuristic(state, goal, type):
+    elements = 0
+    count = 0
+    blocks = {}
 
+    if(type == 1): # Heuristic = 0
+        return 0
+    elif(type == 2): # Consistent 1
+        for i,stack in enumerate(goal):
+            elements += len(stack)
+            for j,block in enumerate(stack):
+                if(len(state[i]) > j):
+                    if(state[i][j] == block):
+                        count += 1
+        return elements - count
+    elif(type == 3): # Consistent 2
+        for i,stack in enumerate(goal):
+            for j,block in enumerate(stack):
+                blocks[block] = i
+
+        for i,stack in enumerate(state):
+            for j,block in enumerate(stack):
+                diff = abs(i-blocks[block])
+                if (diff != 0 ):  count += (diff + 1)
+        return count
+
+    elif(type == 4): # Inconsistent
+        for i,stack in enumerate(goal):
+            elements += len(stack)
+            for j,block in enumerate(stack):
+                if(len(state[i]) > j ):
+                    if(state[i][j] == block):
+                        count += 1
+        return elements - count + len(goal)
 
 def get_wildcards(input_goal):
     wildcards = []
@@ -57,7 +88,7 @@ def search_state_in_frontier(state, frontier):
             return i
     return -1
 
-def expand(frontier, h, node, visited):
+def expand(frontier, h, node, visited, goal, type):
     state = node['state'].copy()
     # Loop in every stack of state
     for i in range(0, len(state)):
@@ -71,7 +102,7 @@ def expand(frontier, h, node, visited):
                     new_state[i] = list(set(stack) - set(block))
                     new_state[j] = stack2 + [block]
                     action = (i,j)
-                    cost = (max(j,i)-min(j,i)) + 1 + node['cost']
+                    cost = (max(j,i)-min(j,i)) + 1 + node['cost'] + heuristic(state, goal['state'], type)
                     #print("new state = ", new_state)
                     new_node = {'state': new_state, 'cost': cost, 'parent': node['state'], 'action': action}
                     #print("New node = ", new_node)
@@ -111,10 +142,10 @@ def display_goal(goal_node, visited):
         node = parent_node
     actions.reverse()
     print(cost)
-    print(actions)
+    print(str(actions).replace("[", "").replace("]", "").replace("),", ");"))
     pass
 
-def uniform_cost_search(max_h, goal, initial_state):
+def search(max_h, goal, initial_state, type):
     # Frontier list: list of dictionaries in format:
     # node = {state: [[a, b], [c], []], cost: 4, parent: [[a, b, c], [], []], action: (1, 2)}
     initial_node = {'state': initial_state, 'cost': 0, 'parent': None, 'action': None}
@@ -128,12 +159,10 @@ def uniform_cost_search(max_h, goal, initial_state):
         frontier = sorted(frontier, key=lambda n: n['cost'])
         node = frontier.pop(0)
         if test_goal(node, goal):
-            pprint(node)
             display_goal(node, visited)
             return True
         visited.append(node)
-        #pprint(node)
-        frontier = expand(frontier, max_h, node, visited)
+        frontier = expand(frontier, max_h, node, visited, goal, type)
 
 
 
@@ -170,8 +199,8 @@ def main():
     goal = {'state': input_goal, 'wildcards': wildcards}
 
     #print("Line 1: %d\nLine 2: %s\nLine 3: %s" % (max_h, initial_state, goal))
-
-    uniform_cost_search(max_h, goal, initial_state)
+    heuristic=3
+    search(max_h, goal, initial_state, heuristic)
 
 
 if __name__ == "__main__":
