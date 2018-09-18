@@ -55,8 +55,9 @@ def heuristic(state, goal, type):
 
         for i,stack in enumerate(state):
             for j,block in enumerate(stack):
-                diff = abs(i-blocks[block])
-                if (diff != 0 ):  count += (diff + 1)
+                if block in blocks:
+                    diff = abs(i-blocks[block])
+                    if (diff != 0 ):  count += (diff + 1)
         return count
 
     elif(type == 4): # Inconsistent
@@ -199,7 +200,7 @@ def main():
     goal = {'state': input_goal, 'wildcards': wildcards}
 
     #print("Line 1: %d\nLine 2: %s\nLine 3: %s" % (max_h, initial_state, goal))
-    heuristic=3
+    heuristic=1
     search(max_h, goal, initial_state, heuristic)
 
 
