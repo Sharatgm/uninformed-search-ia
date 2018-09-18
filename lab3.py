@@ -1,6 +1,7 @@
 import fileinput
 import ast
 import re
+from pprint import pprint
 
 
 def format_input(line):
@@ -32,6 +33,9 @@ def format_input(line):
     # print(lists)
     return lists
 
+#def heuristic(state, goal):
+#    for i,stack in enumerate(state):
+
 
 def get_wildcards(input_goal):
     wildcards = []
@@ -47,25 +51,43 @@ def remove_wildcards_from_stacks(input_goal):
             stack.pop()
     return input_goal
 
+def search_state_in_frontier(state, frontier):
+    for i,node in enumerate(frontier):
+        if(node['state'] == state):
+            return i
+    return -1
 
-def uniform_cost_search(max_h, goal, initial_state):
-    # Frontier list: list of dictionaries in format:
-    # node = {state: [[a, b], [c], []], cost: 4, parent: [[a, b, c], [], []], action: (1, 2)}
-    initial_node = {'state': initial_state, 'cost': 0, 'parent': None, 'action': None}
-    frontier = [initial_node]
-    # list of nodes visited
-    visited = []
-    while True:
-        if len(frontier) == 0:
-            return False
-        frontier = sorted(frontier, key=lambda n: n['cost'])
-        node = frontier.pop()
-        if test_goal(node, goal):
-            display_goal(node, visited)
-            return True
-        visited.append(node)
-        frontier = expand(frontier, max_h, node)
+def expand(frontier, h, node, visited):
+    state = node['state'].copy()
+    # Loop in every stack of state
+    for i in range(0, len(state)):
+        stack = state[i].copy() # Select stack from state
+        for j in range(0, len(state)):  # Loop every stack to check where to move
+            new_state = state.copy()
+            if(j != i): # Avoid trying to move a block from stack x to the same stack x
+                stack2 = state[j].copy()
+                if(len(stack2) < h and len(stack) > 0): # If stack2 has space and stack has blocks to move
+                    block = stack[-1]
+                    new_state[i] = list(set(stack) - set(block))
+                    new_state[j] = stack2 + [block]
+                    action = (i,j)
+                    cost = (max(j,i)-min(j,i)) + 1 + node['cost']
+                    #print("new state = ", new_state)
+                    new_node = {'state': new_state, 'cost': cost, 'parent': node['state'], 'action': action}
+                    #print("New node = ", new_node)
+                    node_in_frontier = search_state_in_frontier(new_state, frontier)
+                    node_in_visited = search_state_in_frontier(new_state, visited)
+                    if(node_in_visited == -1):
+                        if (node_in_frontier != -1):
+                            if(frontier[node_in_frontier]['cost'] > cost):
+                                del frontier[node_in_frontier]
+                                frontier.append(new_node)
+                                #print("New node = ", new_node)
+                        else:
+                            frontier.append(new_node)
+                            #print("New node = ", new_node)
 
+    return frontier
 
 def test_goal(node, goal):
     for index, stack in enumerate(node['state']):
@@ -90,7 +112,29 @@ def display_goal(goal_node, visited):
     actions.reverse()
     print(cost)
     print(actions)
-    return
+    pass
+
+def uniform_cost_search(max_h, goal, initial_state):
+    # Frontier list: list of dictionaries in format:
+    # node = {state: [[a, b], [c], []], cost: 4, parent: [[a, b, c], [], []], action: (1, 2)}
+    initial_node = {'state': initial_state, 'cost': 0, 'parent': None, 'action': None}
+    frontier = [initial_node]
+    # list of nodes visited
+    visited = []
+    while True:
+        if len(frontier) == 0:
+            print("No solution found")
+            return False
+        frontier = sorted(frontier, key=lambda n: n['cost'])
+        node = frontier.pop(0)
+        if test_goal(node, goal):
+            pprint(node)
+            display_goal(node, visited)
+            return True
+        visited.append(node)
+        #pprint(node)
+        frontier = expand(frontier, max_h, node, visited)
+
 
 
 def test_display_goal_function():
@@ -100,9 +144,11 @@ def test_display_goal_function():
         {'state': [['a'], ['c'], ['b']], 'cost': 2, 'parent': [['a', 'b'], ['c'], []], 'action': (0, 2)},
         {'state': [['a', 'c'], [], ['b']], 'cost': 3, 'parent': [['a'], ['c'], ['b']], 'action': (1, 0)}
     ]
-    goal_node = {'state': [['a', 'c'], [], ['b']], 'cost': 3, 'parent': [['a'], ['c'], ['b']], 'action': (1, 0)}
-    display_goal(goal_node, visited_nodes)
 
+    frontier = []
+    goal_node = {'state': [['a', 'c'], [], ['b']], 'cost': 3, 'parent': [['a'], ['c'], ['b']], 'action': (1, 0)}
+    #display_goal(goal_node, visited_nodes)
+    expand(frontier, 3, {'state': [['a', 'b', 'c'], [], []], 'cost': 0, 'parent': None, 'action': None}, visited_nodes)
 
 def main():
     # example input
@@ -123,11 +169,11 @@ def main():
     input_goal = remove_wildcards_from_stacks(input_goal)
     goal = {'state': input_goal, 'wildcards': wildcards}
 
-    print("Line 1: %d\nLine 2: %s\nLine 3: %s" % (max_h, initial_state, goal))
+    #print("Line 1: %d\nLine 2: %s\nLine 3: %s" % (max_h, initial_state, goal))
 
-    # uniform_cost_search(max_h, goal, initial_state)
+    uniform_cost_search(max_h, goal, initial_state)
 
 
 if __name__ == "__main__":
-    test_display_goal_function()
-    #main()
+    #test_display_goal_function()
+    main()
