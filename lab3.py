@@ -1,7 +1,7 @@
 import fileinput
-import ast
-import re
-from pprint import pprint
+import time
+
+debug = False
 
 
 def format_input(line):
@@ -159,7 +159,8 @@ def search(max_h, goal, initial_state, type):
         frontier = sorted(frontier, key=lambda n: n['costWithHeuristic'])
         node = frontier.pop(0)
         if test_goal(node, goal):
-            # print("Number of nodes visited: " + str(len(visited)))
+            if debug:
+                print("Nodes visited: " + str(len(visited)))
             display_goal(node, visited)
             return True
         visited.append(node)
@@ -199,9 +200,30 @@ def main():
     input_goal = remove_wildcards_from_stacks(input_goal)
     goal = {'state': input_goal, 'wildcards': wildcards}
 
-    #print("Line 1: %d\nLine 2: %s\nLine 3: %s" % (max_h, initial_state, goal))
-    heuristic = 3
-    search(max_h, goal, initial_state, heuristic)
+    if debug:
+        heuristic = 1
+        print("heuristic: " + str(heuristic))
+        start_time = time.clock()
+        search(max_h, goal, initial_state, heuristic)
+        print("%s seconds\n" % round(time.clock() - start_time, 5))
+        heuristic = 2
+        print("heuristic: " + str(heuristic))
+        start_time = time.clock()
+        search(max_h, goal, initial_state, heuristic)
+        print("%s seconds\n" % round(time.clock() - start_time, 5))
+        heuristic = 3
+        print("heuristic: " + str(heuristic))
+        start_time = time.clock()
+        search(max_h, goal, initial_state, heuristic)
+        print("%s seconds\n" % round(time.clock() - start_time, 5))
+        heuristic = 4
+        print("heuristic: " + str(heuristic))
+        start_time = time.clock()
+        search(max_h, goal, initial_state, heuristic)
+        print("%s seconds\n" % round(time.clock() - start_time, 5))
+    else:
+        heuristic = 3
+        search(max_h, goal, initial_state, heuristic)
 
 
 if __name__ == "__main__":
