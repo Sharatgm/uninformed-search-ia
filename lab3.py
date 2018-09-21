@@ -99,12 +99,13 @@ def expand(frontier, h, node, visited, goal, type):
             if(j != i): # Avoid trying to move a block from stack x to the same stack x
                 stack2 = state[j].copy()
                 if(len(stack2) < h and len(stack) > 0): # If stack2 has space and stack has blocks to move
-                    block = stack[-1]
-                    new_state[i] = list(set(stack) - set(block))
-                    new_state[j] = stack2 + [block]
+                    block = stack[len(stack)-1]
+                    new_state[i] = stack.copy()
+                    new_state[i].remove(block)
+                    new_state[j] = stack2
+                    new_state[j] += [block]
                     action = (i,j)
                     cost = (max(j,i)-min(j,i)) + 1 + node['cost'] + heuristic(state, goal['state'], type)
-                    #print("new state = ", new_state)
                     new_node = {'state': new_state, 'cost': cost, 'parent': node['state'], 'action': action}
                     #print("New node = ", new_node)
                     node_in_frontier = search_state_in_frontier(new_state, frontier)
@@ -174,11 +175,11 @@ def test_display_goal_function():
         {'state': [['a'], ['c'], ['b']], 'cost': 2, 'parent': [['a', 'b'], ['c'], []], 'action': (0, 2)},
         {'state': [['a', 'c'], [], ['b']], 'cost': 3, 'parent': [['a'], ['c'], ['b']], 'action': (1, 0)}
     ]
-
+    visited = []
     frontier = []
     goal_node = {'state': [['a', 'c'], [], ['b']], 'cost': 3, 'parent': [['a'], ['c'], ['b']], 'action': (1, 0)}
     #display_goal(goal_node, visited_nodes)
-    expand(frontier, 3, {'state': [['a', 'b', 'c'], [], []], 'cost': 0, 'parent': None, 'action': None}, visited_nodes)
+    expand(frontier, 3, {'state': [['b', 'a'], ['c','d','e'], []], 'cost': 0, 'parent': None, 'action': None}, visited_nodes, {'state': [['d', 'e'], [], []], 'cost': 3, 'parent': [['a'], ['c'], ['b']], 'action': (1, 0)}, 1)
 
 def main():
     # example input
