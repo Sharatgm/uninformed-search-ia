@@ -105,21 +105,17 @@ def expand(frontier, h, node, visited, goal, type):
                     new_state[j] = stack2
                     new_state[j] += [block]
                     action = (i,j)
-                    cost = (max(j,i)-min(j,i)) + 1 + node['cost'] + heuristic(state, goal['state'], type)
-                    new_node = {'state': new_state, 'cost': cost, 'parent': node['state'], 'action': action}
-                    #print("New node = ", new_node)
+                    cost = (max(j,i)-min(j,i)) + 1 + node['cost']
+                    new_node = {'state': new_state, 'cost': cost, 'heuristic': heuristic(state, goal['state'], type), 'parent': node['state'], 'action': action}
                     node_in_frontier = search_state_in_frontier(new_state, frontier)
                     node_in_visited = search_state_in_frontier(new_state, visited)
                     if(node_in_visited == -1):
                         if (node_in_frontier != -1):
-                            if(frontier[node_in_frontier]['cost'] > cost):
+                            if(frontier[node_in_frontier]['cost'] + frontier[node_in_frontier]['heuristic'] > cost + heuristic(state, goal['state'], type)):
                                 del frontier[node_in_frontier]
                                 frontier.append(new_node)
-                                #print("New node = ", new_node)
                         else:
                             frontier.append(new_node)
-                            #print("New node = ", new_node)
-
     return frontier
 
 def test_goal(node, goal):
@@ -150,7 +146,7 @@ def display_goal(goal_node, visited):
 def search(max_h, goal, initial_state, type):
     # Frontier list: list of dictionaries in format:
     # node = {state: [[a, b], [c], []], cost: 4, parent: [[a, b, c], [], []], action: (1, 2)}
-    initial_node = {'state': initial_state, 'cost': 0, 'parent': None, 'action': None}
+    initial_node = {'state': initial_state, 'cost': 0, 'heuristic': 0, 'parent': None, 'action': None}
     frontier = [initial_node]
     # list of nodes visited
     visited = []
@@ -158,7 +154,7 @@ def search(max_h, goal, initial_state, type):
         if len(frontier) == 0:
             print("No solution found")
             return False
-        frontier = sorted(frontier, key=lambda n: n['cost'])
+        frontier = sorted(frontier, key=lambda n: n['cost'] + n['heuristic'])
         node = frontier.pop(0)
         if test_goal(node, goal):
             display_goal(node, visited)
@@ -201,7 +197,7 @@ def main():
     goal = {'state': input_goal, 'wildcards': wildcards}
 
     #print("Line 1: %d\nLine 2: %s\nLine 3: %s" % (max_h, initial_state, goal))
-    heuristic=1
+    heuristic = 3
     search(max_h, goal, initial_state, heuristic)
 
 
