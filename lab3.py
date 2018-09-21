@@ -197,7 +197,7 @@ def main():
     goal = {'state': input_goal, 'wildcards': wildcards}
 
     #print("Line 1: %d\nLine 2: %s\nLine 3: %s" % (max_h, initial_state, goal))
-    heuristic = 3
+    heuristic = 1
     search(max_h, goal, initial_state, heuristic)
 
 
