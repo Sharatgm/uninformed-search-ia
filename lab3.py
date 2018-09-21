@@ -40,7 +40,7 @@ def heuristic(state, goal, type):
 
     if(type == 1): # Heuristic = 0
         return 0
-    elif(type == 2): # Consistent 1
+    elif(type == 2): # Consistent 1, number of displaced blocks
         for i,stack in enumerate(goal):
             elements += len(stack)
             for j,block in enumerate(stack):
@@ -48,7 +48,7 @@ def heuristic(state, goal, type):
                     if(state[i][j] == block):
                         count += 1
         return elements - count
-    elif(type == 3): # Consistent 2
+    elif(type == 3): # Consistent 2 (the best one)
         for i,stack in enumerate(goal):
             for j,block in enumerate(stack):
                 blocks[block] = i
@@ -67,7 +67,7 @@ def heuristic(state, goal, type):
                 if(len(state[i]) > j ):
                     if(state[i][j] == block):
                         count += 1
-        return elements - count + len(goal)
+        return elements - count + (len(goal) * 2)
 
 def get_wildcards(input_goal):
     wildcards = []
@@ -105,8 +105,10 @@ def expand(frontier, h, node, visited, goal, type):
                     new_state[j] = stack2
                     new_state[j] += [block]
                     action = (i,j)
-                    cost = (max(j,i)-min(j,i)) + 1 + node['cost'] + heuristic(state, goal['state'], type)
-                    new_node = {'state': new_state, 'cost': cost, 'parent': node['state'], 'action': action}
+                    cost = (max(j,i)-min(j,i)) + 1 + node['cost']
+                    costWithHeuristic = cost + heuristic(state, goal['state'], type)
+                    new_node = {'state': new_state, 'cost': cost, 'costWithHeuristic': costWithHeuristic,
+                                'parent': node['state'], 'action': action}
                     node_in_frontier = search_state_in_frontier(new_state, frontier)
                     node_in_visited = search_state_in_frontier(new_state, visited)
                     if(node_in_visited == -1):
@@ -146,7 +148,7 @@ def display_goal(goal_node, visited):
 def search(max_h, goal, initial_state, type):
     # Frontier list: list of dictionaries in format:
     # node = {state: [[a, b], [c], []], cost: 4, parent: [[a, b, c], [], []], action: (1, 2)}
-    initial_node = {'state': initial_state, 'cost': 0, 'heuristic': 0, 'parent': None, 'action': None}
+    initial_node = {'state': initial_state, 'cost': 0, 'costWithHeuristic': 0, 'parent': None, 'action': None}
     frontier = [initial_node]
     # list of nodes visited
     visited = []
@@ -154,9 +156,10 @@ def search(max_h, goal, initial_state, type):
         if len(frontier) == 0:
             print("No solution found")
             return False
-        frontier = sorted(frontier, key=lambda n: n['cost'])
+        frontier = sorted(frontier, key=lambda n: n['costWithHeuristic'])
         node = frontier.pop(0)
         if test_goal(node, goal):
+            print("Number of nodes visited: " + str(len(visited)))
             display_goal(node, visited)
             return True
         visited.append(node)
@@ -197,7 +200,7 @@ def main():
     goal = {'state': input_goal, 'wildcards': wildcards}
 
     #print("Line 1: %d\nLine 2: %s\nLine 3: %s" % (max_h, initial_state, goal))
-    heuristic = 1
+    heuristic = 3
     search(max_h, goal, initial_state, heuristic)
 
 
