@@ -159,7 +159,7 @@ def search(max_h, goal, initial_state, type):
         frontier = sorted(frontier, key=lambda n: n['costWithHeuristic'])
         node = frontier.pop(0)
         if test_goal(node, goal):
-            print("Number of nodes visited: " + str(len(visited)))
+            # print("Number of nodes visited: " + str(len(visited)))
             display_goal(node, visited)
             return True
         visited.append(node)
