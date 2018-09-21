@@ -105,13 +105,13 @@ def expand(frontier, h, node, visited, goal, type):
                     new_state[j] = stack2
                     new_state[j] += [block]
                     action = (i,j)
-                    cost = (max(j,i)-min(j,i)) + 1 + node['cost']
-                    new_node = {'state': new_state, 'cost': cost, 'heuristic': heuristic(state, goal['state'], type), 'parent': node['state'], 'action': action}
+                    cost = (max(j,i)-min(j,i)) + 1 + node['cost'] + heuristic(state, goal['state'], type)
+                    new_node = {'state': new_state, 'cost': cost, 'parent': node['state'], 'action': action}
                     node_in_frontier = search_state_in_frontier(new_state, frontier)
                     node_in_visited = search_state_in_frontier(new_state, visited)
                     if(node_in_visited == -1):
                         if (node_in_frontier != -1):
-                            if(frontier[node_in_frontier]['cost'] + frontier[node_in_frontier]['heuristic'] > cost + heuristic(state, goal['state'], type)):
+                            if(frontier[node_in_frontier]['cost'] > cost ):
                                 del frontier[node_in_frontier]
                                 frontier.append(new_node)
                         else:
@@ -154,7 +154,7 @@ def search(max_h, goal, initial_state, type):
         if len(frontier) == 0:
             print("No solution found")
             return False
-        frontier = sorted(frontier, key=lambda n: n['cost'] + n['heuristic'])
+        frontier = sorted(frontier, key=lambda n: n['cost'])
         node = frontier.pop(0)
         if test_goal(node, goal):
             display_goal(node, visited)
